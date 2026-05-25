@@ -79,7 +79,7 @@ class ExaSearchTool:
 
 if __name__ == "__main__":
 	# Test the search tool with a basic query
-	result = ExaSearchTool._search_impl("artificial intelligence")
+	result = ExaSearchTool._search_impl("ScholarMark by DecentraSec")
 	print("Search Results:")
 	print(result)
 	
