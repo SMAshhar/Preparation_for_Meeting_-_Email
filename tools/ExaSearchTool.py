@@ -5,26 +5,32 @@ from exa_py import Exa
 from crewai.tools import tool
 
 class ExaSearchTool:
-	# @staticmethod
+	@staticmethod
+	def _search_impl(query: str):
+		"""Internal implementation of search."""
+		return ExaSearchTool._exa().search(f"{query}", use_autoprompt=True, num_results=3)
+
 	@tool
 	def search(query: str):
 		"""Search for a webpage based on the query."""
-		return ExaSearchTool._exa().search(f"{query}", use_autoprompt=True, num_results=3)
+		return ExaSearchTool._search_impl(query)
 
-	# @staticmethod
+	@staticmethod
+	def _find_similar_impl(url: str):
+		"""Internal implementation of find_similar."""
+		return ExaSearchTool._exa().find_similar(url, num_results=3)
+
+	@staticmethod
 	@tool
 	def find_similar(url: str):
 		"""Search for webpages similar to a given URL.
 		The url passed in should be a URL returned from `search`.
 		"""
-		return ExaSearchTool._exa().find_similar(url, num_results=3)
+		return ExaSearchTool._find_similar_impl(url)
 
-	# @staticmethod
-	@tool
-	def get_contents(ids: str):
-		"""Get the contents of a webpage.
-		The ids must be passed in as a list, a list of ids returned from `search`.
-		"""
+	@staticmethod
+	def _get_contents_impl(ids: str):
+		"""Internal implementation of get_contents."""
 		try:
 			# Try to parse as JSON first (safer)
 			try:
@@ -54,10 +60,28 @@ class ExaSearchTool:
 		except Exception as e:
 			return f"Error processing IDs: {str(e)}"
 
-	# @staticmethod
+	@staticmethod
+	@tool
+	def get_contents(ids: str):
+		"""Get the contents of a webpage.
+		The ids must be passed in as a list, a list of ids returned from `search`.
+		"""
+		return ExaSearchTool._get_contents_impl(ids)
+
+	@staticmethod
 	def tools():
 		return [ExaSearchTool.search, ExaSearchTool.find_similar, ExaSearchTool.get_contents]
 
-	# @staticmethod
+	@staticmethod
 	def _exa():
 		return Exa(api_key=os.environ["EXA_API_KEY"])
+	
+
+if __name__ == "__main__":
+	# Test the search tool with a basic query
+	result = ExaSearchTool._search_impl("artificial intelligence")
+	print("Search Results:")
+	print(result)
+	
+
+

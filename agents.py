@@ -1,23 +1,36 @@
 import os
 from textwrap import dedent
 from crewai import Agent
-from custom_llm1 import CustomLLM1
+from custom_llm1 import ClaudeLLM, ClaudeThenLocalLLM, CustomLLM1
 
 from tools.ExaSearchTool import ExaSearchTool
 
 
-
-# Get custom LLM configuration
+# Get local LLM configuration
 custom_llm_endpoint = os.getenv("CUSTOM_LLM_ENDPOINT", "http://localhost:8000/v1/chat/completions")
 custom_llm_model = os.getenv("CUSTOM_LLM_MODEL", "qwen3:8b")
 custom_llm_api_key = os.getenv("CUSTOM_LLM_SERVER_API_KEY", "")
 
-llm = CustomLLM1(
+# Get Claude API configuration
+claude_api_endpoint = os.getenv("CLAUDE_API_ENDPOINT", "https://api.anthropic.com/v1/chat/completions")
+claude_model = os.getenv("CLAUDE_MODEL", "claude-3.5")
+claude_api_key = os.getenv("CLAUDE_API_KEY", "")
+
+local_llm = CustomLLM1(
     model=custom_llm_model,
-    api_key=custom_llm_api_key,  # usually empty for local Ollama
+    api_key=custom_llm_api_key,
     endpoint=custom_llm_endpoint,
-    temperature=0.45
+    temperature=0.45,
 )
+
+claude_llm = ClaudeLLM(
+    model=claude_model,
+    api_key=claude_api_key,
+    endpoint=claude_api_endpoint,
+    temperature=0.45,
+)
+
+llm = ClaudeThenLocalLLM(claude_llm=claude_llm, local_llm=local_llm)
 
 class MeetingPreparationAgents():
 	def research_agent(self):

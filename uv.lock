@@ -687,14 +687,20 @@ wheels = [
 
 [[package]]
 name = "exa-py"
-version = "1.0.7"
+version = "1.16.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
+    { name = "httpcore" },
+    { name = "httpx" },
+    { name = "openai" },
+    { name = "pydantic" },
+    { name = "python-dotenv" },
     { name = "requests" },
+    { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/f9/af/e194fd507c2303876bbf430cdd3f3b1b8995ac44d0f34be32795fa54da42/exa_py-1.0.7.tar.gz", hash = "sha256:c2fc8861b9f3abb38917716dfbe31422eb4b9afef33aec23c279b3439974a835", size = 7112, upload-time = "2024-01-25T03:47:50.68Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/4e/b0/d035d8e56ca7d9192daf4a3bf4d4fc4a64d427d29df700868dd91ffc0a69/exa_py-1.16.2.tar.gz", hash = "sha256:1808a82ef9f25271ffd238d7b9e2ed279a96de89f140de401887866fc8b54ced", size = 41380, upload-time = "2026-04-24T19:08:07.982Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/4b/5e/01bbc7c5177dbeadab949e300a426677d620e6276e71f11c32c6dbc671f5/exa_py-1.0.7-py3-none-any.whl", hash = "sha256:7d5a2a21f602a2c14dd1c919e6a79f06d4b10a5441f21be2e5bbb2d76a20596f", size = 6401, upload-time = "2024-01-25T03:47:47.095Z" },
+    { url = "https://files.pythonhosted.org/packages/98/27/934d9750e4f3c888a0cc8e702c2424069abb7d86b67602229c44083c3d25/exa_py-1.16.2-py3-none-any.whl", hash = "sha256:7a574e978a50dd458b07e8bbb8b1da9543b8f8e57191b7bd1086546414686689", size = 56642, upload-time = "2026-04-24T19:08:09.052Z" },
 ]
 
 [[package]]
@@ -1370,19 +1376,6 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/59/de/679a53472c25860837e32c0442c962fa86e95317a36460e2c9d5c91b17c2/langchain_core-1.4.0.tar.gz", hash = "sha256:1dc341eed802ed9c117c0df3923c991e5e9e226571e5725c194eeb5bd93d1a7f", size = 920260, upload-time = "2026-05-11T18:42:35.919Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/0f/1a/86c38c27b81913a1c6c12448cab55defb5a1097c7dc9a4cea83f55477a2d/langchain_core-1.4.0-py3-none-any.whl", hash = "sha256:23cbbdb46e38ddd1dd5247e6167e96013eae74bea4c5949c550809970a9e565c", size = 548120, upload-time = "2026-05-11T18:42:33.992Z" },
-]
-
-[[package]]
-name = "langchain-exa"
-version = "0.0.1"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "exa-py" },
-    { name = "langchain-core" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/42/e5/e1e07784af7c41c5f809c07c610e6e9785bfe2f833363c1676e72d748b07/langchain_exa-0.0.1.tar.gz", hash = "sha256:56ab74f23b4126340fc91b44ce9f8f7db196f823ce7e95ee06aaa7d22bb65d8b", size = 4232, upload-time = "2024-01-25T03:59:59.937Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/47/6e/55bec4f119e3d863931cea1980863caf756c79a1eae79bd0c6bf56658ff5/langchain_exa-0.0.1-py3-none-any.whl", hash = "sha256:a932b10d4037d314686df5a4d995ebeb87c14adec38d3ea5ad35aa60e8d24e3c", size = 5235, upload-time = "2024-01-25T03:59:58.432Z" },
 ]
 
 [[package]]
@@ -2359,16 +2352,14 @@ dependencies = [
     { name = "crewai" },
     { name = "exa-py" },
     { name = "langchain" },
-    { name = "langchain-exa" },
     { name = "python-dotenv" },
 ]
 
 [package.metadata]
 requires-dist = [
     { name = "crewai", specifier = "==0.130.0" },
-    { name = "exa-py", specifier = "==1.0.7" },
+    { name = "exa-py", specifier = ">=1.5.0,<2.0.0" },
     { name = "langchain", specifier = ">=1.3.1" },
-    { name = "langchain-exa", specifier = "==0.0.1" },
     { name = "python-dotenv", specifier = "==1.0.1" },
 ]
 

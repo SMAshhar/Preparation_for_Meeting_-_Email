@@ -262,6 +262,130 @@ class CustomLLM1(BaseLLM):
 
     def get_context_window_size(self) -> int:
         return 8192
-    
 
+
+class ClaudeLLM(BaseLLM):
+    def __init__(
+        self,
+        model: str,
+        api_key: str,
+        endpoint: str,
+        temperature: Optional[float] = None,
+        timeout: Optional[int] = None,
+    ):
+        super().__init__(model=model, temperature=temperature)
+        self.api_key = api_key or ""
+        self.endpoint = endpoint
+        self.timeout = timeout or int(os.getenv("CLAUDE_TIMEOUT", "30"))
+
+    def call(
+        self,
+        messages: Union[str, List[Dict[str, str]]],
+        tools: Optional[List[dict]] = None,
+        callbacks: Optional[List[Any]] = None,
+        available_functions: Optional[Dict[str, Any]] = None,
+        **kwargs,
+    ) -> Union[str, Any]:
+        if isinstance(messages, str):
+            messages = [{"role": "user", "content": messages}]
+
+        stream_value = kwargs.pop("stream", False)
+
+        payload = {
+            "model": self.model,
+            "messages": messages,
+            "temperature": self.temperature,
+            "stream": stream_value,
+        }
+
+        if "max_tokens" in kwargs:
+            payload["max_tokens_to_sample"] = kwargs["max_tokens"]
+        if "n" in kwargs:
+            payload["n"] = kwargs["n"]
+
+        headers = {"Content-Type": "application/json"}
+        if self.api_key:
+            headers["Authorization"] = f"Bearer {self.api_key}"
+
+        try:
+            response = requests.post(
+                self.endpoint,
+                headers=headers,
+                json=payload,
+                timeout=self.timeout,
+            )
+            response.raise_for_status()
+        except requests.exceptions.RequestException as exc:
+            raise ConnectionError(
+                f"Claude API request failed: {exc}."
+            )
+
+        result = response.json()
+        if isinstance(result, dict):
+            if "choices" in result and isinstance(result["choices"], list) and result["choices"]:
+                first = result["choices"][0]
+                if isinstance(first, dict):
+                    message = first.get("message")
+                    if isinstance(message, dict):
+                        content = message.get("content")
+                        if isinstance(content, str):
+                            return _sanitize_structured_llm_text(content)
+                    text = first.get("text")
+                    if isinstance(text, str):
+                        return _sanitize_structured_llm_text(text)
+            if "completion" in result and isinstance(result["completion"], str):
+                return _sanitize_structured_llm_text(result["completion"])
+            if "output" in result and isinstance(result["output"], str):
+                return _sanitize_structured_llm_text(result["output"])
+
+        return _sanitize_structured_llm_text(str(result))
+
+    def supports_function_calling(self) -> bool:
+        return False
+
+    def get_context_window_size(self) -> int:
+        return 100000
+
+
+class ClaudeThenLocalLLM(BaseLLM):
+    def __init__(self, claude_llm: BaseLLM, local_llm: BaseLLM):
+        super().__init__(model=claude_llm.model or local_llm.model, temperature=claude_llm.temperature)
+        self.claude_llm = claude_llm
+        self.local_llm = local_llm
+
+    def call(
+        self,
+        messages: Union[str, List[Dict[str, str]]],
+        tools: Optional[List[dict]] = None,
+        callbacks: Optional[List[Any]] = None,
+        available_functions: Optional[Dict[str, Any]] = None,
+        **kwargs,
+    ) -> Union[str, Any]:
+        try:
+            return self.claude_llm.call(
+                messages,
+                tools=tools,
+                callbacks=callbacks,
+                available_functions=available_functions,
+                **kwargs,
+            )
+        except Exception as exc:
+            if os.getenv("LLM_FALLBACK_VERBOSE", "").strip().lower() in ("1", "true", "yes"):
+                print(f"Claude API failed, falling back to local LLM: {exc}")
+            return self.local_llm.call(
+                messages,
+                tools=tools,
+                callbacks=callbacks,
+                available_functions=available_functions,
+                **kwargs,
+            )
+
+    def supports_function_calling(self) -> bool:
+        return self.claude_llm.supports_function_calling() or self.local_llm.supports_function_calling()
+
+    def get_context_window_size(self) -> int:
+        return max(
+            self.claude_llm.get_context_window_size(),
+            self.local_llm.get_context_window_size(),
+        )
 
