@@ -83,5 +83,5 @@ class MeetingPreparationTasks():
 				A polished marketing email that effectively communicates the value proposition
 				of our product and encourages engagement from the meeting participants."""),
 			agent=agent,
-			output_file=dedent("marketing_email.md")
+			output_file=dedent("email.md")
 		)
